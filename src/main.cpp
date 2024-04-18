@@ -74,6 +74,64 @@ static unsigned int CreateShader(const std::string& vertexShader, const std::str
     return program;
 }
 
+static void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
+                   GLsizei length, const GLchar *message, const void *userParam) {
+    char const* _source;
+    char const* _type;
+    char const* _severity;
+
+    switch (source) {
+        case GL_DEBUG_SOURCE_API:
+            _source = "API"; break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+            _source = "WINDOW SYSTEM"; break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER:
+            _source = "SHADER COMPILER"; break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY:
+            _source = "THIRD PARTY"; break;
+        case GL_DEBUG_SOURCE_APPLICATION:
+            _source = "APPLICATION"; break;
+        case GL_DEBUG_SOURCE_OTHER:
+        default:
+            _source = "UNKNOWN"; break;
+    }
+
+    switch (type) {
+        case GL_DEBUG_TYPE_ERROR:
+            _type = "ERROR"; break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+            _type = "DEPRECATED BEHAVIOR"; break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+            _type = "UNDEFINED BEHAVIOR"; break;
+        case GL_DEBUG_TYPE_PORTABILITY:
+            _type = "PORTABILITY"; break;
+        case GL_DEBUG_TYPE_PERFORMANCE:
+            _type = "PERFORMANCE"; break;
+        case GL_DEBUG_TYPE_OTHER:
+            _type = "OTHER"; break;
+        case GL_DEBUG_TYPE_MARKER:
+            _type = "MARKER"; break;
+        default:
+            _type = "UNKNOWN"; break;
+    }
+
+    switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH:
+            _severity = "HIGH"; break;
+        case GL_DEBUG_SEVERITY_MEDIUM:
+            _severity = "MEDIUM"; break;
+        case GL_DEBUG_SEVERITY_LOW:
+            _severity = "LOW"; break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION:
+            _severity = "NOTIFICATION"; break;
+        default:
+            _severity = "UNKNOWN"; break;
+    }
+
+    printf("[%s] %s severity, id %d, raised from %s: %s\n",
+           _type, _severity, id, _source, message);
+}
+
 int main()
 {
     GLFWwindow* window;
@@ -98,6 +156,12 @@ int main()
     }
 
     std::cout << glGetString(GL_VERSION) << '\n';
+
+    glEnable(GL_DEBUG_OUTPUT);
+#ifndef NDEBUG
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+#endif
+    glDebugMessageCallback(debugCallback, 0);
 
 #define VERTEX_CNT 4
 #define VERTEX_DIM 2
