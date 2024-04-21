@@ -6,6 +6,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "Renderer/VertexBuffer.h"
+#include "Renderer/IndexBuffer.h"
+
 struct ShaderProgramSource {
     std::string VertexSource, FragmentSource;
 };
@@ -215,10 +218,7 @@ int main() {
     glBindVertexArray(vertexArrayObj);
 
     // generate new vertex buffer
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, POS_SIZE * sizeof(float), positions, GL_STATIC_DRAW);
+    Renderer::VertexBuffer vertexBuffer(positions, POS_SIZE * sizeof(float));
 
     // generate new vertex attributes layout of above buffer
     glEnableVertexAttribArray(0); // id start from 0
@@ -226,10 +226,7 @@ int main() {
     glVertexAttribPointer(0, VERTEX_DIM, GL_FLOAT, GL_FALSE, VERTEX_DIM * sizeof(float), nullptr);
 
     // generate new index buffer from above indices
-    unsigned int ibo;
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, INDEX_CNT * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    Renderer::IndexBuffer indexBuffer = {indices, INDEX_CNT};
 
     // compile the shader to interpret the vertex data and actually draw things
     ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
@@ -262,9 +259,9 @@ int main() {
         // bind/select the above vertex array, this will auto select vertex data and attribute layout for us
         glBindVertexArray(vertexArrayObj);
         // bind the index buffer
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        indexBuffer.Bind();
 
-        // draw call,
+        // draw call
         glDrawElements(GL_TRIANGLES, INDEX_CNT, GL_UNSIGNED_INT, 0);
 
         // animating the red value

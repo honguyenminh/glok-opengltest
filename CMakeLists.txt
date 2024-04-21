@@ -3,7 +3,13 @@ project(glok)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(glok src/main.cpp)
+add_executable(glok src/main.cpp
+        src/Renderer/Renderer.cpp
+        src/Renderer/Renderer.h
+        src/Renderer/VertexBuffer.cpp
+        src/Renderer/VertexBuffer.h
+        src/Renderer/IndexBuffer.cpp
+        src/Renderer/IndexBuffer.h)
 
 # libs include
 target_include_directories(glok PUBLIC lib/include)
