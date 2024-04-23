@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.22.1)
 project(glok)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -9,12 +9,17 @@ add_executable(glok src/main.cpp
         src/Renderer/VertexBuffer.cpp
         src/Renderer/VertexBuffer.h
         src/Renderer/IndexBuffer.cpp
-        src/Renderer/IndexBuffer.h)
+        src/Renderer/IndexBuffer.h
+        src/Renderer/VertexArray.cpp
+        src/Renderer/VertexArray.h
+        src/Renderer/VertexBufferLayout.cpp
+        src/Renderer/VertexBufferLayout.h)
 
 # libs include
 target_include_directories(glok PUBLIC lib/include)
 # GLFW
-target_link_libraries(glok ${CMAKE_SOURCE_DIR}/lib/GLFW/libglfw3.a)
+add_subdirectory(lib/glfw-3.4)
+target_link_libraries(glok glfw)
 # GLEW
 add_compile_definitions(GLEW_STATIC)
 target_link_libraries(glok ${CMAKE_SOURCE_DIR}/lib/GLEW/glew32s.lib)
