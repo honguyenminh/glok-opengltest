@@ -6,6 +6,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "Renderer/VertexArray.h"
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/IndexBuffer.h"
 
@@ -46,11 +47,12 @@ static unsigned int CompileShader(unsigned int type, const std::string &source) 
     if (result == GL_FALSE) {
         int length;
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-        char message[length];
+        char* message = new char[length];
         glGetShaderInfoLog(id, length, &length, message);
         std::cout << "ERROR: Failed to compile "
                   << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!" << std::endl;
         std::cout << message << std::endl;
+        delete[] message;
         glDeleteShader(id);
         return 0;
     }
@@ -163,14 +165,14 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // uncomment this and put monitor into glfwCreateWindow to set it to full screen
-//    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-//    if (!monitor) {
-//        glfwTerminate();
-//        return -1;
-//    }
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    if (!monitor) {
+        glfwTerminate();
+        return -1;
+    }
 
     // Create a windowed mode window and its OpenGL context
-    window = glfwCreateWindow(640, 480, "Hello World", nullptr, nullptr);
+    window = glfwCreateWindow(680, 480, "Hello World", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -213,17 +215,13 @@ int main() {
     };
 
     // generate new vertex array to hold vertex buffer and vertex attributes layout of that buffer
-    unsigned int vertexArrayObj;
-    glGenVertexArrays(1, &vertexArrayObj);
-    glBindVertexArray(vertexArrayObj);
+    Renderer::VertexArray vertexArray;
 
     // generate new vertex buffer
     Renderer::VertexBuffer vertexBuffer(positions, POS_SIZE * sizeof(float));
-
-    // generate new vertex attributes layout of above buffer
-    glEnableVertexAttribArray(0); // id start from 0
-    // this will bind attribute with the buffer for some reason
-    glVertexAttribPointer(0, VERTEX_DIM, GL_FLOAT, GL_FALSE, VERTEX_DIM * sizeof(float), nullptr);
+    Renderer::VertexBufferLayout layout;
+    layout.Push<float>(2);
+    vertexArray.AddBuffer(vertexBuffer, layout);
 
     // generate new index buffer from above indices
     Renderer::IndexBuffer indexBuffer = {indices, INDEX_CNT};
@@ -257,7 +255,7 @@ int main() {
         glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
 
         // bind/select the above vertex array, this will auto select vertex data and attribute layout for us
-        glBindVertexArray(vertexArrayObj);
+        vertexArray.Bind();
         // bind the index buffer
         indexBuffer.Bind();
 
