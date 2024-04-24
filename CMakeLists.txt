@@ -13,7 +13,9 @@ add_executable(glok src/main.cpp
         src/Renderer/VertexArray.cpp
         src/Renderer/VertexArray.h
         src/Renderer/VertexBufferLayout.cpp
-        src/Renderer/VertexBufferLayout.h)
+        src/Renderer/VertexBufferLayout.h
+        src/Renderer/Shader.cpp
+        src/Renderer/Shader.h)
 
 # libs include
 target_include_directories(glok PUBLIC lib/include)

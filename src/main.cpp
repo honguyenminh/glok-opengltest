@@ -1,79 +1,12 @@
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <sstream>
-#include <cassert>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include "Renderer/VertexArray.h"
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/IndexBuffer.h"
-
-struct ShaderProgramSource {
-    std::string VertexSource, FragmentSource;
-};
-
-static ShaderProgramSource ParseShader(const std::string &filepath) {
-    std::ifstream stream(filepath);
-
-    unsigned int type = 0;
-
-    std::string line;
-    std::stringstream ss[2];
-    while (getline(stream, line)) {
-        if (line.find("#shader") != std::string::npos) {
-            if (line.find("vertex") != std::string::npos)
-                type = GL_VERTEX_SHADER;
-            else if (line.find("fragment") != std::string::npos)
-                type = GL_FRAGMENT_SHADER;
-        } else {
-            assert(type != 0);
-            ss[type == GL_FRAGMENT_SHADER] << line << '\n';
-        }
-    }
-
-    return {ss[0].str(), ss[1].str()};
-}
-
-static unsigned int CompileShader(unsigned int type, const std::string &source) {
-    unsigned int id = glCreateShader(type);
-    const char *src = source.c_str();
-    glShaderSource(id, 1, &src, nullptr);
-    glCompileShader(id);
-
-    int result;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-    if (result == GL_FALSE) {
-        int length;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-        char* message = new char[length];
-        glGetShaderInfoLog(id, length, &length, message);
-        std::cout << "ERROR: Failed to compile "
-                  << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!" << std::endl;
-        std::cout << message << std::endl;
-        delete[] message;
-        glDeleteShader(id);
-        return 0;
-    }
-    return id;
-}
-
-static unsigned int CreateShader(const std::string &vertexShader, const std::string &fragmentShader) {
-    unsigned int program = glCreateProgram();
-    unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-    unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
-
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
-    glValidateProgram(program);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    return program;
-}
+#include "Renderer/Shader.h"
 
 static void errorHandler(GLenum source, GLenum type, GLuint id, GLenum severity,
                          GLsizei length, const GLchar *message, const void *userParam) {
@@ -227,20 +160,16 @@ int main() {
     Renderer::IndexBuffer indexBuffer = {indices, INDEX_CNT};
 
     // compile the shader to interpret the vertex data and actually draw things
-    ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
-    unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-    glUseProgram(shader);
+    Renderer::Shader shader("res/shaders/Basic.shader");
 
     // set initial color in the uniform
-    int location = glGetUniformLocation(shader, "u_Color");
-    assert(location != -1);
-    glUniform4f(location, 0.2f, 0.3f, 0.8f, 1.0f);
+    shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
 
     // reset/unbind everything
-    glUseProgram(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    shader.Unbind();
+    vertexArray.Unbind();
+    vertexBuffer.Unbind();
+    indexBuffer.Unbind();
 
     float r = 0.0f; // red value, to animate
     float increment = 0.005f; // increment step
@@ -250,9 +179,9 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // select compiled shader
-        glUseProgram(shader);
+        shader.Bind();
         // set color in the uniform
-        glUniform4f(location, r, 0.3f, 0.8f, 1.0f);
+        shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 
         // bind/select the above vertex array, this will auto select vertex data and attribute layout for us
         vertexArray.Bind();
@@ -277,8 +206,8 @@ int main() {
         glfwPollEvents();
     }
 
-    // clean up shaders
-    glDeleteProgram(shader);
+
+    //! We might need to clean up shaders here
 
     glfwTerminate();
     return 0;
