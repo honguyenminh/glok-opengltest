@@ -7,6 +7,7 @@
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/Shader.h"
+#include "Renderer/Renderer.h"
 
 static void errorHandler(GLenum source, GLenum type, GLuint id, GLenum severity,
                          GLsizei length, const GLchar *message, const void *userParam) {
@@ -171,25 +172,20 @@ int main() {
     vertexBuffer.Unbind();
     indexBuffer.Unbind();
 
+    Renderer::Renderer renderer;
+
     float r = 0.0f; // red value, to animate
     float increment = 0.005f; // increment step
 
     // until the user closes the window
     while (!glfwWindowShouldClose(window)) {
-        glClear(GL_COLOR_BUFFER_BIT);
-
+        renderer.Clear();
         // select compiled shader
         shader.Bind();
         // set color in the uniform
         shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 
-        // bind/select the above vertex array, this will auto select vertex data and attribute layout for us
-        vertexArray.Bind();
-        // bind the index buffer
-        indexBuffer.Bind();
-
-        // draw call
-        glDrawElements(GL_TRIANGLES, INDEX_CNT, GL_UNSIGNED_INT, 0);
+        renderer.Draw(vertexArray, indexBuffer, shader);
 
         // animating the red value
         if (r > 1.0f)

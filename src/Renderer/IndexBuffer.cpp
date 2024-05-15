@@ -5,7 +5,7 @@
 
 namespace Renderer {
 
-IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
+IndexBuffer::IndexBuffer(const unsigned int* data, int count)
     : m_count(count) {
     assert(sizeof(unsigned int) == sizeof(GLuint));
 
@@ -26,7 +26,7 @@ void IndexBuffer::Unbind() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-inline unsigned int IndexBuffer::GetCount() const {
+int IndexBuffer::GetCount() const {
     return m_count;
 }
 
