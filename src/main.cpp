@@ -9,6 +9,8 @@
 #include "Renderer/Shader.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/Texture.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 static void errorHandler(GLenum source, GLenum type, GLuint id, GLenum severity,
                          GLsizei length, const GLchar *message, const void *userParam) {
@@ -165,8 +167,11 @@ int main() {
     // generate new index buffer from above indices
     Renderer::IndexBuffer indexBuffer = {indices, INDEX_CNT};
 
+    glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+
     // compile the shader to interpret the vertex data and actually draw things
     Renderer::Shader shader("res/shaders/Basic.shader");
+    shader.SetUniformMat4f("u_Mvp", proj);
 
     Renderer::Texture texture("res/textures/sync-flat.png");
     const int slot = 0;

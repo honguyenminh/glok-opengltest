@@ -37,14 +37,21 @@ void Shader::SetUniform1i(const std::string &name, int value) {
 }
 
 void Shader::SetUniform4f(const std::string &name, float v1, float v2, float v3, float v4) {
-    Bind();
     int location = GetUniformLocation(name);
     if (location == -1)
         std::cout << "Warning! shader uniform " << name << " doesn't exist\n";
     glUniform4f(location, v1, v2, v3, v4);
 }
 
+void Shader::SetUniformMat4f(const std::string& name, const glm::mat4& mat) {
+    int location = GetUniformLocation(name);
+    if (location == -1)
+        std::cout << "Warning! shader uniform " << name << " doesn't exist\n";
+    glUniformMatrix4fv(location, 1, GL_FALSE, &mat[0][0]);
+}
+
 int Shader::GetUniformLocation(const std::string &name) {
+    Bind();
     // cache the looked up uniform
     if (m_uniformLocationCache.contains(name))
         return m_uniformLocationCache.at(name);

@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "glm/glm.hpp"
 
 namespace Renderer {
 
@@ -27,6 +28,8 @@ public:
     // Set uniforms
     void SetUniform1i(const std::string& name, int);
     void SetUniform4f(const std::string& name, float, float, float, float);
+    void SetUniformMat4f(const std::string& name, const glm::mat4& mat);
+
 private:
     bool TryParseShader();
     int GetUniformLocation(const std::string& name);
