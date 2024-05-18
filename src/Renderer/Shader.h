@@ -25,6 +25,7 @@ public:
     static void Unbind();
 
     // Set uniforms
+    void SetUniform1i(const std::string& name, int);
     void SetUniform4f(const std::string& name, float, float, float, float);
 private:
     bool TryParseShader();

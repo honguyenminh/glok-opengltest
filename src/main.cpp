@@ -8,6 +8,7 @@
 #include "Renderer/IndexBuffer.h"
 #include "Renderer/Shader.h"
 #include "Renderer/Renderer.h"
+#include "Renderer/Texture.h"
 
 static void errorHandler(GLenum source, GLenum type, GLuint id, GLenum severity,
                          GLsizei length, const GLchar *message, const void *userParam) {
@@ -132,13 +133,13 @@ int main() {
 
     // vertex positions buffer
     #define VERTEX_CNT 4
-    #define VERTEX_DIM 2
+    #define VERTEX_DIM 4
     #define POS_SIZE VERTEX_CNT * VERTEX_DIM
     float positions[POS_SIZE] = {
-            -0.5f, -0.5f,
-            0.5f, 0.5f,
-            0.5f, -0.5f,
-            -0.5f, 0.5f
+            -0.5f, -0.5f,  0.0f, 0.0f,
+            0.5f, 0.5f,    1.0f, 1.0f,
+            0.5f, -0.5f,   1.0f, 0.0f,
+            -0.5f, 0.5f,   0.0f, 1.0f
     };
     // index buffer
     // holds which position from vertex pos buffer is in a shape
@@ -148,12 +149,16 @@ int main() {
             0, 1, 3  // shape 2,... etc
     };
 
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+
     // generate new vertex array to hold vertex buffer and vertex attributes layout of that buffer
     Renderer::VertexArray vertexArray;
 
     // generate new vertex buffer
     Renderer::VertexBuffer vertexBuffer(positions, POS_SIZE * sizeof(float));
     Renderer::VertexBufferLayout layout;
+    layout.Push<float>(2);
     layout.Push<float>(2);
     vertexArray.AddBuffer(vertexBuffer, layout);
 
@@ -163,8 +168,10 @@ int main() {
     // compile the shader to interpret the vertex data and actually draw things
     Renderer::Shader shader("res/shaders/Basic.shader");
 
-    // set initial color in the uniform
-    shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
+    Renderer::Texture texture("res/textures/sync-flat.png");
+    const int slot = 0;
+    texture.Bind(slot);
+    shader.SetUniform1i("u_Texture", slot);
 
     // reset/unbind everything
     shader.Unbind();
@@ -182,8 +189,6 @@ int main() {
         renderer.Clear();
         // select compiled shader
         shader.Bind();
-        // set color in the uniform
-        shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 
         renderer.Draw(vertexArray, indexBuffer, shader);
 

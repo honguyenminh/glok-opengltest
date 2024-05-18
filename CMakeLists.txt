@@ -15,9 +15,14 @@ add_executable(glok src/main.cpp
         src/Renderer/VertexBufferLayout.cpp
         src/Renderer/VertexBufferLayout.h
         src/Renderer/Shader.cpp
-        src/Renderer/Shader.h)
+        src/Renderer/Shader.h
+        src/Renderer/Texture.cpp
+        src/Renderer/Texture.h
+        src/vendor/stb/stb_image.cpp
+        src/vendor/stb/stb_image.h)
 
 # libs include
+target_include_directories(glok PUBLIC lib/include src/vendor)
 target_include_directories(glok PUBLIC lib/include)
 # GLFW
 add_subdirectory(lib/glfw-3.4)
